@@ -50,6 +50,37 @@ export class EditComponent implements OnInit {
 
   
 
+  onChange = ($event : Event)  => {
+    const target = $event.target as HTMLInputElement;
+    const file: File = (target.files as FileList)[0];
+    console.log(file);
+
+    this.convertToBase64(file)
+  }
+
+  convertToBase64(file: File){
+    const observable = new Observable((subscriber: Subscriber<any>) => {
+      this.readFile(file, subscriber)
+    });
+
+    observable.subscribe((d) => {
+      this.userData['foto'] = d
+    });
+  }
+
+  readFile(file: File, subscriber: Subscriber<any>) {
+    const filereader = new FileReader();
+    filereader.readAsDataURL(file);
+    filereader.onload = () => {
+      subscriber.next(filereader.result);
+      subscriber.complete();
+    }
+    filereader.onerror = () => {
+      subscriber.error();
+      subscriber.complete();
+    }
+  }
+
 
   
   
