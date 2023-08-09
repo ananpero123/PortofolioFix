@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DocumentData, DocumentSnapshot, Firestore, collection, collectionData,doc, getDoc, updateDoc } from '@angular/fire/firestore';
+import { Observable, Subscriber } from 'rxjs';
+import { Porto } from '../Model/Porto';
 
 @Component({
   selector: 'app-read-portofolio',
@@ -34,5 +36,4 @@ export class ReadPortofolioComponent implements OnInit {
     }
   }
 
-  
 }
