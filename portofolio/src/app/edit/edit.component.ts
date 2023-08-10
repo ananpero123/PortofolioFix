@@ -1,55 +1,54 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ApinampilService } from '../Services/apinampil.service';
-import { Porto } from '../Model/Porto';
+import { ActivatedRoute } from '@angular/router';
+import { Firestore, doc, DocumentSnapshot, DocumentData, getDoc, updateDoc } from '@angular/fire/firestore';
 import { Observable, Subscriber } from 'rxjs';
+import { Porto } from '../Model/Porto';
 
 @Component({
   selector: 'app-edit',
   templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.css'],
+  styleUrls: ['./edit.component.css']
 })
 export class EditComponent implements OnInit {
-  portofolioId: number | null = null;
-  edit: Porto | null = null;
+  title = 'Project_Portofolio';
+  userId: string | null = null;
+  userData: DocumentData  = {};
 
-  constructor(
-    private route: ActivatedRoute,
-    private apiService: ApinampilService,
-    private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    this.route.params.subscribe((params) => {
-      this.portofolioId = +params['id'];
-      if (this.portofolioId !== null) {
-        this.loadPortofolio(this.portofolioId);
+  constructor(private route: ActivatedRoute, private firestore: Firestore) {
+    this.route.paramMap.subscribe(params => {
+      this.userId = params.get('id');
+      if (this.userId) {
+        this.getData();
+        console.log(this.userId);
+        
       }
     });
   }
 
-  loadPortofolio(id: number): void {
-    this.apiService.ambilById(id).subscribe((portofolio: Porto) => {
-      if (portofolio) {
-        this.edit = portofolio;
-      }
-    });
+  async ngOnInit() {
+    
   }
 
-  onSubmit(): void {
-    if (this.portofolioId !== null && this.edit !== null) {
-
-      this.apiService
-        .updatePortofolio(this.portofolioId, this.edit)
-        .subscribe((response) => {
-          this.router.navigate(['/portofolio']);
-        });
+  async getData() {
+    const docRef = doc(this.firestore, `portofolio/${this.userId}`);
+    const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+    if (docSnap.exists()) {
+      this.userData = docSnap.data();
+    } else {
+      console.log('Document not found!');
     }
   }
 
-  myImage!: Observable<any>;
+  async saveData() {
+    if (this.userData && this.userId) {
+      const docRef = doc(this.firestore, 'portofolio', this.userId);
+      await updateDoc(docRef, this.userData);
+      
+      console.log('Data updated successfully!111');
+    }
+  }
 
-  base64code!: any;
+  
 
   onChange = ($event : Event)  => {
     const target = $event.target as HTMLInputElement;
@@ -65,10 +64,7 @@ export class EditComponent implements OnInit {
     });
 
     observable.subscribe((d) => {
-      if(this.edit != null){
-        this.edit.foto = d;
-        this.myImage = d;
-      }
+      this.userData['foto'] = d
     });
   }
 
@@ -84,4 +80,9 @@ export class EditComponent implements OnInit {
       subscriber.complete();
     }
   }
+
+
+  
+  
 }
+

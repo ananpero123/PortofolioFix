@@ -3,6 +3,8 @@ import { AuthService } from 'src/app/Services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Porto } from '../Model/Porto';
 import { ApinampilService } from '../Services/apinampil.service';
+import { Firestore, collection, addDoc,collectionData } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-portofolio',
@@ -10,22 +12,23 @@ import { ApinampilService } from '../Services/apinampil.service';
   styleUrls: ['./portofolio.component.css']
 })
 export class PortofolioComponent implements OnInit {
-  nampilkan: Porto[] = [];
+  userData!: Observable<any>;
 
-  constructor(public auth: AuthService, private router: Router,private ApinampilService:ApinampilService,private route: ActivatedRoute) {}
+  constructor(private firestore:Firestore){
+    this.getData();
+  }
+
+  getData(){
+    const colectionInstance = collection(this.firestore, 'portofolio')
+    collectionData(colectionInstance, {idField: 'id'}).subscribe(val => {
+      console.log(val);
+    })
+
+    this.userData = collectionData(colectionInstance, {idField: 'id'});
+  }
 
   ngOnInit(): void {
-    this.auth.checkLoginStatus();
-    this.ApinampilService.ambils().subscribe((result: Porto[])=>(this.nampilkan = result));
-  }
-
-  logout() {
-    this.auth.signout();
-    this.navigateToLogin();
-  }
-
-  private navigateToLogin() {
-    this.router.navigate(['login']); 
+    
   }
 }
 
